@@ -3,16 +3,16 @@
 namespace esphome {
 namespace aquaperla_usb {
 
-std::string AquaperlaUSB::get_debug_message() {
-  return "Hello World from GitHub Component!";
-}
-
 void AquaperlaUSB::setup() {
-  // Setup-Code hier einfügen, falls erforderlich
+  ESP_LOGCONFIG(TAG, "Setting up AquaperlaUSB component...");
 }
 
 void AquaperlaUSB::loop() {
-  // Loop-Code hier einfügen, falls erforderlich
+  // Hier könnte Code für die USB-Kommunikation stehen.
+}
+
+std::string AquaperlaUSB::get_debug_message() {
+  return "Hello from AquaperlaUSB!";
 }
 
 }  // namespace aquaperla_usb
