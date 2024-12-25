@@ -1,22 +1,23 @@
 #pragma once
 
-#include "esphome/core/component.h"
-#include "esphome/components/sensor/sensor.h"
+#include "esphome.h"
 
-namespace esphome {
-namespace aquaperla_usb {
-
-class AquaperlaUSB : public Component {
+class AquaperlaUSB : public PollingComponent {
  public:
+  // Konstruktor
+  AquaperlaUSB();
+
+  // Funktion, um die Komponente zu initialisieren
   void setup() override;
-  void loop() override;
 
-  // Beispiel: Debug-Nachricht
-  std::string get_debug_message();
+  // Funktion, um periodische Aufgaben auszuführen
+  void update() override;
 
-  // Sensoren
-  sensor::Sensor *verbrauch_24h_sensor = nullptr;
+  // Beispiel für ein Sensor-Objekt (Wasserverbrauch, Regenerationen, etc.)
+  Sensor *verbrauch_24h_sensor = new Sensor();
+  Sensor *regenerationen_seit_ibn_sensor = new Sensor();
+
+ private:
+  // Weitere private Member-Variablen können hier definiert werden, z.B. UART-Kommunikation
+  UARTComponent *uart_ = nullptr;
 };
-
-}  // namespace aquaperla_usb
-}  // namespace esphome
