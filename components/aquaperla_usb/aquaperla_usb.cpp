@@ -1,26 +1,19 @@
-#include "esphome.h"
+#include "aquaperla_usb.h"
 
-class AquaperlaUSBComponent : public PollingComponent {
- public:
-  AquaperlaUSBComponent() : PollingComponent(10000) {}
+namespace esphome {
+namespace aquaperla_usb {
 
-  void setup() override {
-    // Initialisierung des USB-Kommunikationsmoduls
-  }
+std::string AquaperlaUSB::get_debug_message() {
+  return "Hello World from GitHub Component!";
+}
 
-  void update() override {
-    // Lese Daten vom USB-Gerät
-    int value = get_aqua_perla_data();  // Beispiel: Hole den Wert von Aquaperla
+void AquaperlaUSB::setup() {
+  // Setup-Code hier einfügen, falls erforderlich
+}
 
-    // Sende den Wert an den entsprechenden Sensor
-    id(aquaperla_sensor).publish_state(value);
-  }
+void AquaperlaUSB::loop() {
+  // Loop-Code hier einfügen, falls erforderlich
+}
 
- private:
-  int get_aqua_perla_data() {
-    // Logik zur Abfrage des Werts vom USB-Gerät
-    return 123;  // Beispielwert
-  }
-};
-
-AquaperlaUSBComponent aquaperla_usb;
+}  // namespace aquaperla_usb
+}  // namespace esphome
