@@ -1,47 +1,51 @@
 #include "aquaperla_usb.h"
+#include "esphome/core/log.h"
 
-AquaperlaUSB::AquaperlaUSB() : PollingComponent(60 * 1000) {  // Update alle 60 Sekunden
-  // Hier kannst du weitere Initialisierungen vornehmen, falls nötig
+namespace aquaperla_usb {
+
+static const char *TAG = "aquaperla_usb";
+
+// Setup-Methode
+void AqaPerlaSensor::setup() {
+  ESP_LOGCONFIG(TAG, "Setting up AqaPerlaSensor...");
 }
 
-void AquaperlaUSB::setup() {
-  // Hier wird die Kommunikation mit dem Gerät eingerichtet, z.B. UART
-  // Du musst sicherstellen, dass du eine gültige UART-Verbindung hast
-  // Beispiel:
-  
-  // uart_ = new UARTComponent();
-  // uart_->set_rx_pin(GPIO_NUM_16);  // Beispiel Pin (anpassen je nach Hardware)
-  // uart_->set_tx_pin(GPIO_NUM_17);
-  // uart_->set_baud_rate(9600);
-
-  ESP_LOGD("AquaperlaUSB", "AquaperlaUSB setup completed.");
+// Update-Methode
+void AqaPerlaSensor::update() {
+  ESP_LOGD(TAG, "Sending command to query 24h consumption...");
+  send_command(0x08);  // Befehl zum Abfragen des 24-Stunden-Verbrauchs
 }
 
-void AquaperlaUSB::update() {
-  // Hier wird regelmäßig der Wert von Sensoren aktualisiert
-  // Du würdest hier die Kommunikation mit dem USB-Gerät durchführen und die Sensoren aktualisieren
-  
-  // Beispiel: Auslesen von Verbrauch 24h
-  uint8_t verbrauch_24h_raw = 0;
-  // Hier müsste die Kommunikation mit dem USB-Gerät stehen, um die Rohdaten zu erhalten
-  // Beispiel:
-  // uart_->write(data);  // Ein Beispielbefehl senden
-  // uart_->read(&verbrauch_24h_raw, 1);  // Einen Wert lesen
+// Methode zum Senden eines Befehls
+void AqaPerlaSensor::send_command(uint8_t command) {
+  uint8_t crc = 0x0D + command + 1;  // Berechnung der Prüfsumme
+  uint8_t data[] = {0x0D, command, 0x01, crc, 0x0A};
+  this->write_array(data, sizeof(data));  // Daten über UART senden
 
-  // Umwandeln der Rohdaten in den tatsächlichen Wert (dies muss je nach Gerät angepasst werden)
-  float verbrauch_24h = verbrauch_24h_raw / 10.0;  // Beispielhafte Umrechnung (anpassen)
-
-  // Sensor mit dem neuen Wert aktualisieren
-  verbrauch_24h_sensor->publish_state(verbrauch_24h);
-
-  // Beispiel: Auslesen von Regenerationen seit IBN
-  uint8_t regenerationen_raw = 0;
-  // Hier müsste die Kommunikation für Regenerationen auch implementiert werden
-  // Beispiel:
-  // uart_->read(&regenerationen_raw, 1);
-
-  int regenerationen = regenerationen_raw;  // Beispielhafte Umrechnung (anpassen)
-  regenerationen_seit_ibn_sensor->publish_state(regenerationen);
-
-  ESP_LOGD("AquaperlaUSB", "Updated values: Verbrauch 24h: %.1f, Regenerationen seit IBN: %d", verbrauch_24h, regenerationen);
+  // Verarbeitung der Antwort
+  this->process_response();
 }
+
+// Methode zum Verarbeiten der Antwort
+void AqaPerlaSensor::process_response() {
+  // Warte auf eine Antwort mit 5 Bytes
+  delay(100);
+
+  if (this->available() >= 5) {
+    uint8_t response[5];
+    this->read_array(response, 5);  // Antwortdaten lesen
+
+    // Überprüfen, ob die Antwort auf unser Kommando passt
+    if (response[1] == 0x08) {
+      int value = response[3] + (response[4] << 8);  // Wert berechnen
+      ESP_LOGI(TAG, "Received 24h consumption: %d L", value);
+      this->verbrauch_24h->publish_state(value);  // Sensorwert veröffentlichen
+    } else {
+      ESP_LOGW(TAG, "Unexpected response received");
+    }
+  } else {
+    ESP_LOGW(TAG, "No response or incomplete response received");
+  }
+}
+
+}  // namespace aquaperla_usb
