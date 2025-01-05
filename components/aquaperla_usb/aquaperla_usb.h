@@ -12,7 +12,7 @@ namespace aquaperla_usb {
  * Diese Klasse implementiert die Kommunikation mit dem AqaPerla-Gerät
  * über UART und die Abfrage spezifischer Sensorwerte.
  */
-class AqaPerlaSensor : public esphome::PollingComponent,  // Ermöglicht zyklische Updates
+class AquaPerlaSensor : public esphome::PollingComponent,  // Ermöglicht zyklische Updates
                        public esphome::uart::UARTDevice {  // Unterstützt UART-Kommunikation
  public:
   /**
@@ -20,7 +20,7 @@ class AqaPerlaSensor : public esphome::PollingComponent,  // Ermöglicht zyklisc
    * 
    * @param parent UART-Komponente, mit der dieses Gerät verbunden ist.
    */
-  explicit AqaPerlaSensor(esphome::uart::UARTComponent *parent);
+  explicit AquaPerlaSensor(esphome::uart::UARTComponent *parent);
 
   /**
    * @brief Initialisiert den Sensor.
